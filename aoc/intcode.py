@@ -88,6 +88,11 @@ class Machine:
         for output in self.run_generator():
             print(output)
 
+    def run_single_output(self):
+        for output in self.run_generator():
+            assert self.peek() == OpCodes.HALT._value_
+            return output
+
     def run_generator(self):
         while True:
             opcode = self.read_opcode()
