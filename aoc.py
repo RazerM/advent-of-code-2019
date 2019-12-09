@@ -13,6 +13,7 @@ SOLVERS = {
     3: aoc.day03.solve,
     4: aoc.day04.solve,
     5: aoc.day05.solve,
+    6: aoc.day06.solve,
     7: aoc.day07.solve,
 }
 
