@@ -1,6 +1,7 @@
 from collections import deque
 from enum import Enum
 from itertools import repeat
+from math import floor, log10
 
 import attr
 
@@ -93,12 +94,12 @@ class Machine:
     _relative_base = attr.ib(init=False, default=0)
 
     def read_opcode(self):
-        value = str(self.memory[self.pos])
+        value = self.memory[self.pos]
         self.pos += 1
-        opcode = int(value[-2:])
+        opcode = value % 100
 
-        for mode in map(int, value[:-2]):
-            self._parameter_modes.append(ParameterMode(mode))
+        for p in range(floor(log10(value)), 1, -1):
+            self._parameter_modes.append(ParameterMode(value // 10 ** p % 10))
 
         return OpCodes(opcode)
 
