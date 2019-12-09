@@ -2,7 +2,7 @@ from collections import deque
 from copy import copy
 from itertools import permutations
 
-from .intcode import Machine
+from .intcode import Machine, parse_opcodes
 from .itertools import last
 from .registry import register
 
@@ -55,8 +55,7 @@ def compute_feedback(opcodes, phase_seq):
 
 @register(day=7)
 def solve(file, verbose):
-    data = ''.join(line.strip() for line in file)
-    opcodes = [int(x) for x in data.split(',')]
+    opcodes = parse_opcodes(file)
 
     highest_signal = max(
         compute(opcodes, phase_seq) for phase_seq in permutations(range(5))

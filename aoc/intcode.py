@@ -173,3 +173,8 @@ class Machine:
                 self._relative_base += p1.read()
             elif opcode is OpCodes.HALT:
                 break
+
+
+def parse_opcodes(file):
+    data = ''.join(line.strip() for line in file)
+    return [int(x) for x in data.split(',')]

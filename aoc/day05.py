@@ -1,6 +1,6 @@
 from copy import copy
 
-from .intcode import Machine, OpCodes
+from .intcode import Machine, OpCodes, parse_opcodes
 from .registry import register
 
 
@@ -20,8 +20,7 @@ def compute(opcodes, *, system_id):
 
 @register(day=5)
 def solve(file, verbose):
-    data = ''.join(line.strip() for line in file)
-    opcodes = [int(x) for x in data.split(',')]
+    opcodes = parse_opcodes(file)
 
     print('Part 1:', compute(opcodes, system_id=1))
     print('Part 2:', compute(opcodes, system_id=5))

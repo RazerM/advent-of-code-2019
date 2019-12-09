@@ -1,13 +1,12 @@
 from copy import copy
 
-from .intcode import Machine
+from .intcode import Machine, parse_opcodes
 from .registry import register
 
 
 @register(day=9)
 def solve(file, verbose):
-    data = ''.join(line.strip() for line in file)
-    opcodes = [int(x) for x in data.split(',')]
+    opcodes = parse_opcodes(file)
 
     machine = Machine(copy(opcodes), input=[1])
     print('Part 1:', machine.run_single_output())

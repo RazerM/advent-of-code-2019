@@ -1,7 +1,7 @@
 from copy import copy
 from itertools import product
 
-from .intcode import Machine
+from .intcode import Machine, parse_opcodes
 from .registry import register
 
 
@@ -23,7 +23,7 @@ def part2(opcodes):
 
 @register(day=2)
 def solve(file, verbose):
-    opcodes = [int(x) for x in file.read().split(',')]
+    opcodes = parse_opcodes(file)
 
     print('Part 1:', compute(opcodes, noun=12, verb=2))
     print('Part 2:', part2(opcodes))
