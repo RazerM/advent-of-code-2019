@@ -5,19 +5,7 @@ import click
 import requests
 from dotenv import load_dotenv
 
-import aoc
-
-SOLVERS = {
-    1: aoc.day01.solve,
-    2: aoc.day02.solve,
-    3: aoc.day03.solve,
-    4: aoc.day04.solve,
-    5: aoc.day05.solve,
-    6: aoc.day06.solve,
-    7: aoc.day07.solve,
-    8: aoc.day08.solve,
-    9: aoc.day09.solve,
-}
+from aoc import get_solver
 
 INPUT_URL = 'https://adventofcode.com/2019/day/{day}/input'
 
@@ -41,7 +29,7 @@ def cli():
 def run(day, file, verbose):
     """If FILE is not passed, stdin is used instead."""
     try:
-        solve = SOLVERS[day]
+        solve = get_solver(day)
     except KeyError:
         raise click.UsageError('Unimplemented!')
 

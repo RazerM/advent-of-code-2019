@@ -2,6 +2,8 @@ from enum import Enum
 
 import attr
 
+from .registry import register
+
 
 class Direction(Enum):
     UP = 'U'
@@ -51,6 +53,7 @@ def parse_move(s):
     return Move(Direction(direction), int(distance))
 
 
+@register(day=3)
 def solve(file, verbose):
     wires = (
         [parse_move(move) for move in line.strip().split(',')]

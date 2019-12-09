@@ -1,6 +1,7 @@
 from copy import copy
 
 from .intcode import Machine, OpCodes
+from .registry import register
 
 
 def compute(opcodes, *, system_id):
@@ -17,6 +18,7 @@ def compute(opcodes, *, system_id):
     return diagnostic
 
 
+@register(day=5)
 def solve(file, verbose):
     data = ''.join(line.strip() for line in file)
     opcodes = [int(x) for x in data.split(',')]

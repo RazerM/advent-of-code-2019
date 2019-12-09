@@ -4,6 +4,7 @@ from itertools import permutations
 
 from .intcode import Machine
 from .itertools import last
+from .registry import register
 
 
 def compute(opcodes, phase_seq):
@@ -52,6 +53,7 @@ def compute_feedback(opcodes, phase_seq):
     return final_outputs[-1]
 
 
+@register(day=7)
 def solve(file, verbose):
     data = ''.join(line.strip() for line in file)
     opcodes = [int(x) for x in data.split(',')]

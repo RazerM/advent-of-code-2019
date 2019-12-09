@@ -2,6 +2,7 @@ from copy import copy
 from itertools import product
 
 from .intcode import Machine
+from .registry import register
 
 
 def compute(opcodes, *, noun, verb):
@@ -20,6 +21,7 @@ def part2(opcodes):
             return 100 * noun + verb
 
 
+@register(day=2)
 def solve(file, verbose):
     opcodes = [int(x) for x in file.read().split(',')]
 

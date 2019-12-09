@@ -3,6 +3,8 @@ from functools import reduce
 import numpy as np
 from more_itertools import chunked
 
+from .registry import register
+
 
 combine = np.vectorize(lambda a, b: b if a == 2 else a)
 
@@ -19,6 +21,7 @@ def get_layers(digits, *, width, height):
     ]
 
 
+@register(day=8)
 def solve(file, verbose):
     digits = (int(c) for c in file.read().strip())
 

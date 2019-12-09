@@ -1,6 +1,9 @@
 import networkx as nx
 
+from .registry import register
 
+
+@register(day=6)
 def solve(file, verbose):
     di_graph = nx.parse_edgelist(file, delimiter=')', create_using=nx.DiGraph)
 

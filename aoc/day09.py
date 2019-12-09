@@ -1,8 +1,10 @@
 from copy import copy
 
 from .intcode import Machine
+from .registry import register
 
 
+@register(day=9)
 def solve(file, verbose):
     data = ''.join(line.strip() for line in file)
     opcodes = [int(x) for x in data.split(',')]

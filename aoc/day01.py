@@ -1,3 +1,6 @@
+from .registry import register
+
+
 def calculate_fuel(mass, *, recursive=False):
     fuel = mass // 3 - 2
 
@@ -10,6 +13,7 @@ def calculate_fuel(mass, *, recursive=False):
     return fuel + calculate_fuel(fuel, recursive=True)
 
 
+@register(day=1)
 def solve(file, verbose):
     modules = [int(module) for module in file]
     print('Part 1:', sum(calculate_fuel(m) for m in modules))

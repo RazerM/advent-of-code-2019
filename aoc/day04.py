@@ -1,5 +1,7 @@
 from itertools import groupby
 
+from .registry import register
+
 
 def exactly_two_adjacent(iterable):
     for _, g in groupby(iterable):
@@ -28,6 +30,7 @@ def check_valid2(password):
     return is_sorted(chars) and exactly_two_adjacent(chars)
 
 
+@register(day=4)
 def solve(file, verbose):
     lo, hi = map(int, file.read().split('-'))
 
