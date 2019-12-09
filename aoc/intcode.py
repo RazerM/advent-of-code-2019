@@ -1,6 +1,6 @@
 from collections import deque
-from copy import copy
 from enum import Enum
+from itertools import repeat
 
 import attr
 
@@ -8,6 +8,7 @@ import attr
 class ParameterMode(Enum):
     POSITION = 0
     IMMEDIATE = 1
+    RELATIVE = 2
 
 
 class OpCodes(Enum):
@@ -19,24 +20,37 @@ class OpCodes(Enum):
     JUMP_IF_FALSE = 6
     LESS_THAN = 7
     EQUAL = 8
+    ADJUST_RELATIVE_BASE = 9
     HALT = 99
 
 
 @attr.s(repr=False)
 class Entry:
-    state = attr.ib()
+    machine = attr.ib()
     parameter_mode = attr.ib()
     value = attr.ib()
 
     def write(self, value):
         if self.parameter_mode is ParameterMode.IMMEDIATE:
             raise RuntimeError('This parameter is in immediate mode.')
-        self.state.memory[self.value] = value
+
+        position = self.value
+
+        if self.parameter_mode is ParameterMode.RELATIVE:
+            position += self.machine._relative_base
+
+        self.machine.memory[position] = value
 
     def read(self):
         if self.parameter_mode is ParameterMode.IMMEDIATE:
             return self.value
-        return self.state.memory[self.value]
+
+        position = self.value
+
+        if self.parameter_mode is ParameterMode.RELATIVE:
+            position += self.machine._relative_base
+
+        return self.machine.memory[position]
 
     def __repr__(self):
         cls = type(self)
@@ -49,12 +63,34 @@ def values(*parameters):
         yield p.read()
 
 
+class GrowableList(list):
+    def _grow(self, item):
+        if isinstance(item, slice) and item.stop is not None:
+            upper = item.stop
+        elif isinstance(item, int):
+            upper = item + 1
+        else:
+            return
+
+        if upper > len(self):
+            self.extend(repeat(0, times=upper - len(self)))
+
+    def __getitem__(self, item):
+        self._grow(item)
+        return super().__getitem__(item)
+
+    def __setitem__(self, key, value):
+        self._grow(key)
+        super().__setitem__(key, value)
+
+
 @attr.s
 class Machine:
-    memory = attr.ib()
+    memory = attr.ib(converter=GrowableList)
     pos = attr.ib(default=0)
-    _parameter_modes = attr.ib(init=False, factory=deque)
     input = attr.ib(factory=list, converter=iter)
+    _parameter_modes = attr.ib(init=False, factory=deque)
+    _relative_base = attr.ib(init=False, default=0)
 
     def read_opcode(self):
         value = str(self.memory[self.pos])
@@ -82,7 +118,7 @@ class Machine:
             except IndexError:
                 mode = ParameterMode.POSITION
 
-            yield Entry(state=self, parameter_mode=mode, value=arg)
+            yield Entry(machine=self, parameter_mode=mode, value=arg)
 
     def run(self):
         for output in self.run_generator():
@@ -131,5 +167,8 @@ class Machine:
                 p1, p2, p3 = self.read_args(3)
                 a, b = values(p1, p2)
                 p3.write(1 if a == b else 0)
+            elif opcode is OpCodes.ADJUST_RELATIVE_BASE:
+                p1 = self.read_arg()
+                self._relative_base += p1.read()
             elif opcode is OpCodes.HALT:
                 break
