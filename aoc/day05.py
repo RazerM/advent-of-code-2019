@@ -1,11 +1,9 @@
-from copy import copy
-
 from .intcode import Machine, OpCodes, parse_opcodes
 from .registry import register
 
 
 def compute(opcodes, *, system_id):
-    machine = Machine(copy(opcodes), input=[system_id])
+    machine = Machine(opcodes, input=[system_id])
 
     diagnostic = None
 

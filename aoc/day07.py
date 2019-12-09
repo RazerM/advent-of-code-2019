@@ -1,5 +1,4 @@
 from collections import deque
-from copy import copy
 from itertools import permutations
 
 from .intcode import Machine, parse_opcodes
@@ -11,7 +10,7 @@ def compute(opcodes, phase_seq):
     value = 0
 
     for phase in phase_seq:
-        machine = Machine(copy(opcodes), input=[phase, value])
+        machine = Machine(opcodes, input=[phase, value])
         value = machine.run_single_output()
 
     return value
@@ -42,7 +41,7 @@ def compute_feedback(opcodes, phase_seq):
     signals = deque([0])
 
     machines = [
-        Machine(copy(opcodes), input=machine_input(phase, signals))
+        Machine(opcodes, input=machine_input(phase, signals))
         for phase in phase_seq
     ]
 

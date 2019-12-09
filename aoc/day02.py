@@ -1,4 +1,3 @@
-from copy import copy
 from itertools import product
 
 from .intcode import Machine, parse_opcodes
@@ -6,7 +5,7 @@ from .registry import register
 
 
 def compute(opcodes, *, noun, verb):
-    machine = Machine(memory=copy(opcodes))
+    machine = Machine(memory=opcodes)
     machine.memory[1] = noun
     machine.memory[2] = verb
 

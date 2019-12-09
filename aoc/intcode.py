@@ -87,6 +87,7 @@ class GrowableList(list):
 
 @attr.s
 class Machine:
+    # Using GrowableList means input is always copied
     memory = attr.ib(converter=GrowableList)
     pos = attr.ib(default=0)
     input = attr.ib(factory=list, converter=iter)
