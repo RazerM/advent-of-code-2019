@@ -1,3 +1,4 @@
+import inspect
 from collections import deque
 from enum import Enum
 from itertools import repeat
@@ -85,7 +86,32 @@ class GrowableList(list):
         super().__setitem__(key, value)
 
 
+class Halt(Exception):
+    """Raised when the machine should halt."""
+
+
+def implements(opcode):
+    def decorator(fn):
+        fn._implements_opcode = opcode
+        return fn
+    return decorator
+
+
+def register_opcode_funcs(cls):
+    for _, fn in inspect.getmembers(cls, inspect.isfunction):
+        try:
+            opcode = fn._implements_opcode
+        except AttributeError:
+            continue
+
+        del fn._implements_opcode
+        cls._opcode_funcs[opcode] = fn
+
+    return cls
+
+
 @attr.s
+@register_opcode_funcs
 class Machine:
     # Using GrowableList means input is always copied
     memory = attr.ib(converter=GrowableList)
@@ -93,6 +119,7 @@ class Machine:
     input = attr.ib(factory=list, converter=iter)
     _parameter_modes = attr.ib(init=False, factory=deque)
     _relative_base = attr.ib(init=False, default=0)
+    _opcode_funcs = dict()
 
     def read_opcode(self):
         value = self.memory[self.pos]
@@ -103,6 +130,9 @@ class Machine:
             self._parameter_modes.append(ParameterMode(value // 10 ** p % 10))
 
         return OpCodes(opcode)
+
+    def _run_opcode(self, opcode):
+        return self._opcode_funcs[opcode](self)
 
     def peek(self):
         return self.memory[self.pos]
@@ -134,46 +164,73 @@ class Machine:
     def run_generator(self):
         while True:
             opcode = self.read_opcode()
-            if opcode is OpCodes.ADD:
-                p1, p2, p3 = self.read_args(3)
-                a, b = values(p1, p2)
-                p3.write(a + b)
-            elif opcode is OpCodes.MULTIPLY:
-                p1, p2, p3 = self.read_args(3)
-                a, b = values(p1, p2)
-                p3.write(a * b)
-            elif opcode is OpCodes.INPUT:
-                p1 = self.read_arg()
-                try:
-                    p1.write(next(self.input))
-                except StopIteration:
-                    raise RuntimeError('Expected input')
-            elif opcode is OpCodes.OUTPUT:
-                p1 = self.read_arg()
-                yield p1.read()
-            elif opcode is OpCodes.JUMP_IF_TRUE:
-                p1, p2 = self.read_args(2)
-                a, b = values(p1, p2)
-                if a != 0:
-                    self.pos = b
-            elif opcode is OpCodes.JUMP_IF_FALSE:
-                p1, p2 = self.read_args(2)
-                a, b = values(p1, p2)
-                if a == 0:
-                    self.pos = b
-            elif opcode is OpCodes.LESS_THAN:
-                p1, p2, p3 = self.read_args(3)
-                a, b = values(p1, p2)
-                p3.write(1 if a < b else 0)
-            elif opcode is OpCodes.EQUAL:
-                p1, p2, p3 = self.read_args(3)
-                a, b = values(p1, p2)
-                p3.write(1 if a == b else 0)
-            elif opcode is OpCodes.ADJUST_RELATIVE_BASE:
-                p1 = self.read_arg()
-                self._relative_base += p1.read()
-            elif opcode is OpCodes.HALT:
+            try:
+                output = self._run_opcode(opcode)
+            except Halt:
                 break
+            else:
+                if output is not None:
+                    yield output
+
+    @implements(OpCodes.ADD)
+    def _add(self):
+        p1, p2, p3 = self.read_args(3)
+        a, b = values(p1, p2)
+        p3.write(a + b)
+
+    @implements(OpCodes.MULTIPLY)
+    def _multiply(self):
+        p1, p2, p3 = self.read_args(3)
+        a, b = values(p1, p2)
+        p3.write(a * b)
+
+    @implements(OpCodes.INPUT)
+    def _input(self):
+        p1 = self.read_arg()
+        try:
+            p1.write(next(self.input))
+        except StopIteration:
+            raise RuntimeError('Expected input')
+
+    @implements(OpCodes.OUTPUT)
+    def _output(self):
+        p1 = self.read_arg()
+        return p1.read()
+
+    @implements(OpCodes.JUMP_IF_TRUE)
+    def _jump_if_true(self):
+        p1, p2 = self.read_args(2)
+        a, b = values(p1, p2)
+        if a != 0:
+            self.pos = b
+
+    @implements(OpCodes.JUMP_IF_FALSE)
+    def _jump_if_false(self):
+        p1, p2 = self.read_args(2)
+        a, b = values(p1, p2)
+        if a == 0:
+            self.pos = b
+
+    @implements(OpCodes.LESS_THAN)
+    def _less_than(self):
+        p1, p2, p3 = self.read_args(3)
+        a, b = values(p1, p2)
+        p3.write(1 if a < b else 0)
+
+    @implements(OpCodes.EQUAL)
+    def _equal(self):
+        p1, p2, p3 = self.read_args(3)
+        a, b = values(p1, p2)
+        p3.write(1 if a == b else 0)
+
+    @implements(OpCodes.ADJUST_RELATIVE_BASE)
+    def _adjust_relative_base(self):
+        p1 = self.read_arg()
+        self._relative_base += p1.read()
+
+    @implements(OpCodes.HALT)
+    def _halt(self):
+        raise Halt
 
 
 def parse_opcodes(file):
