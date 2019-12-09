@@ -11,7 +11,9 @@ setup(
     install_requires=[
         'attrs ~= 19.3',
         'click ~= 7.0',
+        'more-itertools ~= 8.0',
         'networkx ~= 2.4',
+        'numpy ~= 1.17',
         'python-dotenv >= 0.10.3',
         'requests ~= 2.22',
     ],
