@@ -9,7 +9,7 @@ setup(
     license='MIT',
     packages=find_packages(),
     install_requires=[
-        'attr ~= 19.3',
+        'attrs ~= 19.3',
         'click ~= 7.0',
         'networkx ~= 2.4',
         'python-dotenv >= 0.10.3',
