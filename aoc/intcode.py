@@ -233,6 +233,6 @@ class Machine:
         raise Halt
 
 
-def parse_opcodes(file):
+def parse_intcode(file):
     data = ''.join(line.strip() for line in file)
     return [int(x) for x in data.split(',')]

@@ -1,16 +1,16 @@
 from collections import deque
 from itertools import permutations
 
-from .intcode import Machine, parse_opcodes
+from .intcode import Machine, parse_intcode
 from .itertools import last
 from .registry import register
 
 
-def compute(opcodes, phase_seq):
+def compute(intcode, phase_seq):
     value = 0
 
     for phase in phase_seq:
-        machine = Machine(opcodes, input=[phase, value])
+        machine = Machine(intcode, input=[phase, value])
         value = machine.run_single_output()
 
     return value
@@ -37,11 +37,11 @@ def machine_feedback(machine, signals):
         yield output
 
 
-def compute_feedback(opcodes, phase_seq):
+def compute_feedback(intcode, phase_seq):
     signals = deque([0])
 
     machines = [
-        Machine(opcodes, input=machine_input(phase, signals))
+        Machine(intcode, input=machine_input(phase, signals))
         for phase in phase_seq
     ]
 
@@ -54,16 +54,16 @@ def compute_feedback(opcodes, phase_seq):
 
 @register(day=7)
 def solve(file, verbose):
-    opcodes = parse_opcodes(file)
+    intcode = parse_intcode(file)
 
     highest_signal = max(
-        compute(opcodes, phase_seq) for phase_seq in permutations(range(5))
+        compute(intcode, phase_seq) for phase_seq in permutations(range(5))
     )
 
     print('Part 1:', highest_signal)
 
     highest_signal = max(
-        compute_feedback(opcodes, phase_seq)
+        compute_feedback(intcode, phase_seq)
         for phase_seq in permutations(range(5, 10))
     )
 

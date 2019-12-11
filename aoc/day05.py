@@ -1,9 +1,9 @@
-from .intcode import Machine, OpCodes, parse_opcodes
+from .intcode import Machine, OpCodes, parse_intcode
 from .registry import register
 
 
-def compute(opcodes, *, system_id):
-    machine = Machine(opcodes, input=[system_id])
+def compute(intcode, *, system_id):
+    machine = Machine(intcode, input=[system_id])
 
     diagnostic = None
 
@@ -18,7 +18,7 @@ def compute(opcodes, *, system_id):
 
 @register(day=5)
 def solve(file, verbose):
-    opcodes = parse_opcodes(file)
+    intcode = parse_intcode(file)
 
-    print('Part 1:', compute(opcodes, system_id=1))
-    print('Part 2:', compute(opcodes, system_id=5))
+    print('Part 1:', compute(intcode, system_id=1))
+    print('Part 2:', compute(intcode, system_id=5))
