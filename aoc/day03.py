@@ -3,6 +3,7 @@ from enum import Enum
 import attr
 
 from .registry import register
+from .utils import Vector
 
 
 class Direction(Enum):
@@ -34,18 +35,6 @@ class Move:
             return Vector(1, 0)
         else:
             raise RuntimeError('Unreachable!')
-
-
-@attr.s(frozen=True)
-class Vector:
-    x = attr.ib()
-    y = attr.ib()
-
-    def __add__(self, other):
-        if isinstance(other, Vector):
-            return Vector(self.x + other.x, self.y + other.y)
-
-        return NotImplemented
 
 
 def parse_move(s):
